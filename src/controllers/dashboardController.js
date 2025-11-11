@@ -79,27 +79,35 @@ exports.getRecentEvents = asyncHandler(async (req, res, next) => {
   // Get total count
   const total = await Event.countDocuments(query);
 
-  // Format events with relative time
-  const formattedEvents = events.map(event => ({
-    id: event._id,
-    type: event.type,
-    message: event.message,
-    severity: event.severity,
-    timestamp: event.timestamp.toISOString(),
-    relativeTime: event.getRelativeTime(),
-    intersection: event.intersectionId ? event.intersectionId.name : null,
-    user: event.userId ? event.userId.name : null,
-    isRead: event.isRead
-  }));
+  // Format events for frontend
+  const formattedEvents = events.map(event => {
+    // Map severity to type for frontend
+    let eventType = 'success';
+    if (event.severity === 'error') eventType = 'error';
+    else if (event.severity === 'warning') eventType = 'warning';
+    else eventType = 'success';
+
+    // Map severity to priority
+    let priority = 'low';
+    if (event.severity === 'error') priority = 'high';
+    else if (event.severity === 'warning') priority = 'medium';
+    else priority = 'low';
+
+    return {
+      id: event._id,
+      type: eventType,
+      message: event.message,
+      location: event.intersectionId ? event.intersectionId.name : '',
+      timestamp: event.timestamp.toISOString(),
+      priority: priority,
+      isRead: event.isRead
+    };
+  });
 
   const response = {
     success: true,
-    data: formattedEvents,
-    pagination: {
-      page: parsedPage,
-      limit: parsedLimit,
-      total,
-      pages: Math.ceil(total / parsedLimit)
+    data: {
+      events: formattedEvents
     }
   };
 

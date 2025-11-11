@@ -20,10 +20,12 @@ const logger = require('./src/utils/logger');
 const authRoutes = require('./src/routes/authRoutesV2'); // Using V2 with refresh tokens
 const testRoutes = require('./src/routes/testRoutes');
 const dashboardRoutes = require('./src/routes/dashboardRoutes');
+const adminRoutes = require('./src/routes/adminRoutes');
 
 // Import services
 const jobsService = require('./src/services/jobs');
 const { initializeDashboardSocket } = require('./src/socket/dashboardSocket');
+const bootstrapOwner = require('./src/utils/bootstrapOwner');
 
 // Initialize express app
 const app = express();
@@ -38,10 +40,15 @@ app.use(helmet());
 // CORS Configuration
 const corsOptions = {
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
+
+// Handle OPTIONS preflight requests
+app.options('*', cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -74,6 +81,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/api/auth', authRoutes);
 app.use('/api/test', testRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -119,10 +127,17 @@ initializeDashboardSocket(io);
 // Start server (only if not in test mode)
 if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 5000;
-  server.listen(PORT, () => {
+  server.listen(PORT, async () => {
     logger.success(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
     logger.info(`API available at http://localhost:${PORT}`);
     logger.info(`Socket.IO ready for connections`);
+    
+    // Bootstrap owner account
+    try {
+      await bootstrapOwner();
+    } catch (error) {
+      logger.error('Failed to bootstrap owner account:', error.message);
+    }
     
     // Start background jobs after server is running
     setTimeout(() => {

@@ -27,12 +27,12 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Please provide a password'],
-    minlength: [6, 'Password must be at least 6 characters'],
+    minlength: [8, 'Password must be at least 8 characters'],
     select: false // Don't return password by default
   },
   role: {
     type: String,
-    enum: ['admin', 'operator', 'viewer'],
+    enum: ['owner', 'admin', 'operator', 'viewer'],
     default: 'viewer'
   },
   avatar: {
@@ -91,7 +91,11 @@ UserSchema.methods.matchPassword = async function(enteredPassword) {
  */
 UserSchema.methods.getSignedJwtToken = function() {
   return jwt.sign(
-    { id: this._id },
+    { 
+      id: this._id,
+      email: this.email,
+      role: this.role
+    },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRE }
   );

@@ -9,7 +9,7 @@ const User = require('../models/User');
  * @access  Public
  */
 exports.register = asyncHandler(async (req, res, next) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
 
   // Check if user already exists
   const existingUser = await User.findOne({ email });
@@ -17,12 +17,13 @@ exports.register = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('User with this email already exists', 400));
   }
 
-  // Create user
+  // Create user - ALWAYS force role to 'viewer' for self-registration
+  // Ignore any role sent by client for security
   const user = await User.create({
     name,
     email,
     password,
-    role: role || 'viewer' // Default to viewer if not specified
+    role: 'viewer'
   });
 
   // Send token response
