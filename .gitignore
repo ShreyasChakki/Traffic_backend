@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.test
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Test outputs
+coverage/
+test-output.txt
+*.test.log
+
+# Build outputs
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Documentation files
+*_DOCUMENTATION.md
+*_GUIDE.md
+*_SUMMARY.md
+*_TESTING.md
+*_REPORT.md
+*_CHECKLIST.md
+*_INSTRUCTIONS.md
+*_CLEAN.md
+
+# Batch/Shell scripts (optional - uncomment if you don't want to track these)
+# *.bat
+# *.sh
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
